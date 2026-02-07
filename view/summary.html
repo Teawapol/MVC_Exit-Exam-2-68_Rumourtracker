@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-end mb-3">
+  <div>
+    <h2 class="mb-1">หน้าสรุปผล</h2>
+    <div class="text-secondary">แสดงข่าวลือที่เข้าสู่ PANIC และข่าวลือที่ถูกยืนยันผลแล้ว</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body p-4">
+        <h4 class="mb-1">ข่าวลือสถานะ PANIC</h4>
+        <div class="text-secondary small mb-3">เข้าสู่ PANIC เมื่อจำนวนรายงานมากกว่า {{ panicLimit }}</div>
+
+        {% if panicRumours|length == 0 %}
+          <div class="text-secondary">ไม่มีข่าวลือที่เข้าสู่ PANIC</div>
+        {% else %}
+          <div class="list-group list-group-dark">
+            {% for r in panicRumours %}
+              <a class="list-group-item bg-dark border-secondary list-group-item-action"
+                 href="{{ url('rumourDetail', rumourId=r['rumourId']) }}">
+                <div class="d-flex justify-content-between">
+                  <div class="fw-semibold">{{ r['title'] }}</div>
+                  <span class="badge text-bg-danger">PANIC</span>
+                </div>
+                <div class="text-secondary small mt-1">
+                  รหัส {{ r['rumourId'] }} • รายงาน {{ r['reportCount'] }} ครั้ง
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body p-4">
+        <h4 class="mb-1">ข่าวลือที่ตรวจสอบแล้ว</h4>
+        <div class="text-secondary small mb-3">เมื่อถูกตรวจสอบแล้ว จะไม่สามารถรายงานเพิ่มได้</div>
+
+        {% if verifiedRumours|length == 0 %}
+          <div class="text-secondary">ยังไม่มีข่าวลือที่ถูกยืนยันผล</div>
+        {% else %}
+          <div class="list-group list-group-dark">
+            {% for r in verifiedRumours %}
+              <a class="list-group-item bg-dark border-secondary list-group-item-action"
+                 href="{{ url('rumourDetail', rumourId=r['rumourId']) }}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="fw-semibold">{{ r['title'] }}</div>
+                  {% if r['verdict'] == 'true' %}
+                    <span class="badge text-bg-info">จริง</span>
+                  {% else %}
+                    <span class="badge text-bg-warning">เท็จ</span>
+                  {% endif %}
+                </div>
+                <div class="text-secondary small mt-1">
+                  รหัส {{ r['rumourId'] }} • ตรวจเมื่อ {{ r['checkedAt'] }}
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

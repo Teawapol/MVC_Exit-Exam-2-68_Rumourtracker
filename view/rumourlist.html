@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-end mb-3">
+  <div>
+    <h2 class="mb-1">หน้ารวมข่าวลือ</h2>
+    <div class="text-secondary">เรียงตามจำนวนรายงาน (ความร้อนแรง) หรือคะแนนความน่าเชื่อถือ</div>
+  </div>
+
+  <form class="d-flex gap-2" method="get" action="{{ url('rumourList') }}">
+    <select class="form-select form-select-sm" name="sort">
+      <option value="reports" {{ 'selected' if sortMode == 'reports' else '' }}>เรียงตามจำนวนรายงาน</option>
+      <option value="credibility" {{ 'selected' if sortMode == 'credibility' else '' }}>เรียงตามคะแนนความน่าเชื่อถือ</option>
+      <option value="date" {{ 'selected' if sortMode == 'date' else '' }}>เรียงตามวันที่สร้าง</option>
+    </select>
+    <button class="btn btn-outline-light btn-sm">จัดเรียง</button>
+  </form>
+</div>
+
+<div class="card shadow-soft">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>รหัส</th>
+          <th>หัวข้อ</th>
+          <th class="d-none d-md-table-cell">แหล่งที่มา</th>
+          <th class="text-end">ความน่าเชื่อถือ</th>
+          <th class="text-end">รายงาน</th>
+          <th>สถานะ</th>
+          <th>ผลตรวจสอบ</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rumours %}
+        <tr class="{{ 'row-panic' if r['status'] == 'panic' else '' }}">
+          <td class="text-mono">{{ r['rumourId'] }}</td>
+          <td class="fw-semibold">{{ r['title'] }}</td>
+          <td class="d-none d-md-table-cell text-secondary">{{ r['source'] }}</td>
+          <td class="text-end">{{ "%.1f"|format(r['credibility']) }}</td>
+          <td class="text-end">
+            <span class="badge rounded-pill text-bg-secondary">{{ r['reportCount'] }}</span>
+          </td>
+          <td>
+            {% if r['status'] == 'panic' %}
+              <span class="badge text-bg-danger">PANIC</span>
+            {% else %}
+              <span class="badge text-bg-success">ปกติ</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r['verdict'] == 'true' %}
+              <span class="badge text-bg-info">จริง</span>
+            {% elif r['verdict'] == 'false' %}
+              <span class="badge text-bg-warning">เท็จ</span>
+            {% else %}
+              <span class="badge text-bg-secondary">ยังไม่ตรวจสอบ</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-light" href="{{ url('rumourDetail', rumourId=r['rumourId']) }}">
+              ดูรายละเอียด
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="text-secondary small mt-3">
+  หมายเหตุ: สถานะจะเปลี่ยนเป็น PANIC เมื่อจำนวนรายงาน <b>มากกว่า</b> {{ panicLimit }}
+</div>
+{% endblock %}
